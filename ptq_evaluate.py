@@ -6,6 +6,9 @@ from functools import partial
 import os
 import random
 import warnings
+import sys
+import json
+RESULTS_DIR = '/root/arcade/final_scripts/final_results'
 
 import numpy as np
 import torch
@@ -57,12 +60,12 @@ model_names = sorted(
     callable(torchvision.models.__dict__[name]) and not name.startswith("get_"))
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet PTQ Validation')
-parser.add_argument(
-    '--calibration-dir',
-    required=True,
-    help='Path to folder containing Imagenet calibration folder')
-parser.add_argument(
-    '--validation-dir', required=True, help='Path to folder containing Imagenet validation folder')
+# parser.add_argument(
+#     '--calibration-dir',
+#     required=True,
+#     help='Path to folder containing Imagenet calibration folder')
+# parser.add_argument(
+#     '--validation-dir', required=True, help='Path to folder containing Imagenet validation folder')
 parser.add_argument(
     '--workers', default=8, type=int, help='Number of data loading workers (default: 8)')
 parser.add_argument(
@@ -76,16 +79,21 @@ parser.add_argument(
     type=int,
     help='Minibatch size for validation (default: 256)')
 parser.add_argument(
+    '--calibration-samples',
+    default=1000,
+    type=int,
+    help='Calibration size (default: 1000)')
+parser.add_argument(
     '--export-dir', default='.', type=str, help='Directory where to store the exported models')
 parser.add_argument('--gpu', default=None, type=int, help='GPU id to use (default: None)')
-parser.add_argument(
-    '--calibration-samples', default=1000, type=int, help='Calibration size (default: 1000)')
-parser.add_argument(
-    '--model-name',
-    default='resnet18',
-    metavar='ARCH',
-    choices=model_names,
-    help='model architecture: ' + ' | '.join(model_names) + ' (default: resnet18)')
+# parser.add_argument(
+#     '--calibration-samples', default=1000, type=int, help='Calibration size (default: 1000)')
+# parser.add_argument(
+#     '--model-name',
+#     default='resnet18',
+#     metavar='ARCH',
+#     choices=model_names,
+#     help='model architecture: ' + ' | '.join(model_names) + ' (default: resnet18)')
 parser.add_argument(
     '--dtype',
     default='float',
@@ -333,6 +341,7 @@ def generate_ref_input(args, device, dtype):
 
 def main():
     args = parser.parse_args()
+    args.model_name = 'mobilenet_v3_small'
     validate_args(args)
     dtype = getattr(torch, args.dtype)
 
@@ -399,31 +408,76 @@ def main():
         f"Split Input: {args.channel_splitting_split_input} - "
         f"Merge BN: {args.merge_bn}")
 
-    # Get model-specific configurations about input shapes and normalization
-    model_config = get_model_config(args.model_name)
+    # --- MODIFIED SECTION TO LOAD CIFAR-10 DATA ---
+    print("Setting up CIFAR-10 data loaders...")
 
-    # Generate calibration and validation dataloaders
-    resize_shape = model_config['resize_shape']
-    center_crop_shape = model_config['center_crop_shape']
-    inception_preprocessing = model_config['inception_preprocessing']
-    calib_loader = generate_dataloader(
-        args.calibration_dir,
-        args.batch_size_calibration,
-        args.workers,
-        resize_shape,
-        center_crop_shape,
-        args.calibration_samples,
-        inception_preprocessing)
-    val_loader = generate_dataloader(
-        args.validation_dir,
-        args.batch_size_validation,
-        args.workers,
-        resize_shape,
-        center_crop_shape,
-        inception_preprocessing=inception_preprocessing)
+    # Define paths to your CIFAR-10 split
+    DATA_DIR = '/root/arcade/data/cifar10_split'
+    TRAIN_DIR = os.path.join(DATA_DIR, 'train')
+    # VAL_DIR = os.path.join(DATA_DIR, 'validation') # We will use this for validation
+    TEST_DIR = os.path.join(DATA_DIR, 'test') # We will use this for the final evaluation
 
+    # Define the same transforms used during training/testing
+    # This uses the ImageNet normalization your best model was trained with
+    data_transform = torchvision.transforms.Compose([
+        torchvision.transforms.Resize((224, 224)),
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
+    # Create the calibration data loader from a subset of the training set
+    calibration_dataset = torchvision.datasets.ImageFolder(TRAIN_DIR, transform=data_transform)
+    # Use a subset for calibration as is common practice
+    num_calibration_samples = args.calibration_samples
+    calibration_subset = torch.utils.data.Subset(
+        calibration_dataset,
+        list(range(min(num_calibration_samples, len(calibration_dataset)))))
+    calib_loader = torch.utils.data.DataLoader(
+        calibration_subset,
+        batch_size=args.batch_size_calibration,
+        shuffle=False,
+        num_workers=args.workers)
+
+    # Create the validation data loader
+    validation_dataset = torchvision.datasets.ImageFolder(TEST_DIR, transform=data_transform)
+    val_loader = torch.utils.data.DataLoader(
+        validation_dataset,
+        batch_size=args.batch_size_validation,
+        shuffle=False,
+        num_workers=args.workers)
+
+    print(f"Loaded {len(calib_loader.dataset)} samples for calibration.")
+    print(f"Loaded {len(val_loader.dataset)} samples for validation.")
+
+
+    # --- THIS IS HOW WE LOAD OUR CUSTOM MODEL ---
     # Get the model from torchvision
-    model = get_torchvision_model(args.model_name)
+    custom_model_path = '/root/arcade/final_scripts/final_models/best_model_imagenet.pth'
+    
+    print("Loading custom model: MobileNetV3-Small for CIFAR-10")
+    
+    # 1. Instantiate the base model architecture
+    model = torchvision.models.mobilenet_v3_small(weights=None)
+    
+    # 2. **Crucially, modify the final layer to match your saved model's architecture**
+    in_features = model.classifier[3].in_features
+    model.classifier[3] = torch.nn.Linear(in_features, 10) # Set for 10 CIFAR-10 classes
+    
+    # 3. Now that the architecture matches, load your trained weights
+    if not os.path.exists(custom_model_path):
+        print(f"Error: Model path not found at {custom_model_path}", file=sys.stderr)
+        sys.exit(1)
+        
+    device_for_loading = torch.device('cuda' if args.gpu is not None else 'cpu')
+    model.load_state_dict(torch.load(custom_model_path, map_location=device_for_loading))
+    
+    # 4. Prepare model for evaluation
+    model = model.to(dtype)
+    model.eval()
+    print(f"Successfully loaded model from {custom_model_path}")
+    # --- THIS IS HOW WE LOAD OUR CUSTOM MODEL ---
+
+
     model = model.to(dtype)
     model.eval()
 
@@ -490,6 +544,14 @@ def main():
         act_scale_computation_type=args.act_scale_computation_type,
         uint_sym_act_for_unsigned_values=args.uint_sym_act_for_unsigned_values)
 
+    # Short sanity check for one conv layer's quantized integer weights
+    for m in quant_model.modules():
+        if hasattr(m, 'weight_quant'):
+            qt = m.weight_quant(m.weight)
+            int_tensor = qt.int()
+            print(f"[Q] {m.__class__.__name__}: int8 [{int_tensor.min().item()}, {int_tensor.max().item()}]")
+            break  # Only show the first layer for brevity
+
     if args.act_scale_computation_type == 'static':
         # Calibrate the quant_model on the calibration dataloader
         print("Starting activation calibration:")
@@ -540,22 +602,12 @@ def main():
         print("Applying bias correction:")
         apply_bias_correction(calib_loader, quant_model)
 
-    # Validate the quant_model on the validation dataloader
-    print("Starting validation:")
-    with torch.no_grad(), quant_inference_mode(quant_model):
-        param = next(iter(quant_model.parameters()))
-        device, dtype = param.device, param.dtype
-        ref_input = generate_ref_input(args, device, dtype)
-        quant_model(ref_input)
-        compiled_model = torch.compile(quant_model, fullgraph=True, disable=not args.compile)
-        validate(val_loader, compiled_model, stable=dtype != torch.bfloat16)
-
     if args.export_onnx_qcdq or args.export_torch_qcdq:
         # Generate reference input tensor to drive the export process
         param = next(iter(quant_model.parameters()))
         device, dtype = param.device, param.dtype
-        ref_input = generate_ref_input(args, device, dtype)
-
+        # ref_input = generate_ref_input(args, device, dtype)
+        ref_input = torch.ones(1, 3, 224, 224, device=device, dtype=dtype)
         export_name = os.path.join(args.export_dir, config)
         if args.export_onnx_qcdq:
             export_name = export_name + '.onnx'
@@ -564,6 +616,40 @@ def main():
         if args.export_torch_qcdq:
             export_name = export_name + '.pt'
             export_torch_qcdq(quant_model, ref_input, export_name)
+
+    # --- Compute final accuracy manually ---
+    correct = total = 0
+    quant_model.eval()
+    with torch.no_grad(), quant_inference_mode(quant_model):
+        for inputs, targets in val_loader:
+            inputs = inputs.to(device).to(dtype)
+            targets = targets.to(device)
+            outputs = quant_model(inputs)
+            _, predicted = outputs.max(1)
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
+    final_acc = 100.0 * correct / total
+    print(f"[RESULT] Final Validation Accuracy: {final_acc:.2f}%")
+
+    # --- Save results and parameters ---
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    result_data = {
+        'model_evaluated': args.model_name,
+        'quant_format': args.quant_format,
+        'target_backend': args.target_backend,
+        'weight_bit_width': args.weight_bit_width,
+        'act_bit_width': args.act_bit_width,
+        'scale_factor_type': args.scale_factor_type,
+        'bias_bit_width': args.bias_bit_width,
+        'graph_equalization_iters': args.graph_eq_iterations,
+        'calibration_samples': len(calibration_subset),
+        'validation_samples': len(validation_dataset),
+        'final_accuracy': final_acc
+    }
+    output_file = os.path.join(RESULTS_DIR, f'ptq_results_{args.quant_format}.json')
+    with open(output_file, 'w') as f:
+        json.dump(result_data, f, indent=4)
+    print(f"Results saved to {output_file}")
 
 
 if __name__ == '__main__':
