@@ -1,6 +1,7 @@
 # Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
-
+import contextlib
+import numpy as np
 import argparse
 from functools import partial
 import os
@@ -34,8 +35,8 @@ from brevitas_examples.imagenet_classification.ptq.ptq_common import calibrate_b
 from brevitas_examples.imagenet_classification.ptq.ptq_common import quantize_model
 from brevitas_examples.imagenet_classification.ptq.utils import add_bool_arg
 from brevitas_examples.imagenet_classification.ptq.utils import get_model_config
-from brevitas_examples.imagenet_classification.ptq.utils import get_torchvision_model
-from brevitas_examples.imagenet_classification.utils import generate_dataloader
+# from brevitas_examples.imagenet_classification.ptq.utils import get_torchvision_model
+# from brevitas_examples.imagenet_classification.utils import generate_dataloader
 from brevitas_examples.imagenet_classification.utils import SEED
 from brevitas_examples.imagenet_classification.utils import validate
 
@@ -341,6 +342,11 @@ def generate_ref_input(args, device, dtype):
 
 def main():
     args = parser.parse_args()
+    print(f"DEBUG: Full argument list: {args}")
+    # Early debug prints for calibration_dir, val_dirs, and dataset
+    print(f"DEBUG: Calibration directory: {args.calibration_dir if hasattr(args, 'calibration_dir') else 'N/A'}")
+    print(f"DEBUG: Validation directories: {val_dirs if 'val_dirs' in locals() else 'N/A'}")
+    print(f"DEBUG: Using dataset: {args.dataset if hasattr(args, 'dataset') else 'N/A'}")
     args.model_name = 'mobilenet_v3_small'
     validate_args(args)
     dtype = getattr(torch, args.dtype)
@@ -425,13 +431,47 @@ def main():
         torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    # Create the calibration data loader from a subset of the training set
+    # Create the calibration data loader using a balanced subset per class
     calibration_dataset = torchvision.datasets.ImageFolder(TRAIN_DIR, transform=data_transform)
-    # Use a subset for calibration as is common practice
+    print(f"Calibration dataset path: {TRAIN_DIR}")
+    print(f"Calibration transform: {calibration_dataset.transform}")
     num_calibration_samples = args.calibration_samples
-    calibration_subset = torch.utils.data.Subset(
-        calibration_dataset,
-        list(range(min(num_calibration_samples, len(calibration_dataset)))))
+    num_classes = len(calibration_dataset.classes)
+
+    # Determine how many samples per class
+    samples_per_class = num_calibration_samples // num_classes
+    print(f"DEBUG: Calibration samples per class: {samples_per_class} (total classes: {num_classes}, requested samples: {num_calibration_samples})")
+
+    # Collect indices by class
+    labels = calibration_dataset.targets
+    class_indices = {i: [] for i in range(num_classes)}
+    for idx, label in enumerate(labels):
+        class_indices[label].append(idx)
+
+    # Sample from each class (this part is perfect)
+    selected_indices = []
+    for cls, idxs in class_indices.items():
+        random.shuffle(idxs)
+        selected_indices.extend(idxs[:samples_per_class])
+
+    print(f"DEBUG: Selected indices per class counts: {[len(class_indices[c][:samples_per_class]) for c in range(num_classes)]}")
+    # --- More efficient "fill up" logic ---
+    remaining = num_calibration_samples - len(selected_indices)
+    if remaining > 0:
+        # Use a set for fast lookups
+        selected_set = set(selected_indices)
+        
+        # Get all indices that were NOT selected
+        all_indices = set(range(len(calibration_dataset)))
+        available_indices = list(all_indices - selected_set)
+        random.shuffle(available_indices)
+        
+        # Add the remaining number of samples from the unused pool
+        selected_indices.extend(available_indices[:remaining])
+    print(f"DEBUG: Total selected indices after fill-up: {len(selected_indices)}")
+
+    calibration_subset = torch.utils.data.Subset(calibration_dataset, selected_indices)
+
     calib_loader = torch.utils.data.DataLoader(
         calibration_subset,
         batch_size=args.batch_size_calibration,
@@ -440,6 +480,8 @@ def main():
 
     # Create the validation data loader
     validation_dataset = torchvision.datasets.ImageFolder(TEST_DIR, transform=data_transform)
+    print(f"Validation dataset path: {TEST_DIR}")
+    print(f"Validation transform: {validation_dataset.transform}")
     val_loader = torch.utils.data.DataLoader(
         validation_dataset,
         batch_size=args.batch_size_validation,
@@ -470,13 +512,29 @@ def main():
         
     device_for_loading = torch.device('cuda' if args.gpu is not None else 'cpu')
     model.load_state_dict(torch.load(custom_model_path, map_location=device_for_loading))
+    load_res = model.load_state_dict(torch.load(custom_model_path, map_location=device_for_loading), strict=False)
+    print("DEBUG: load_state_dict missing_keys:", load_res.missing_keys)
+    print("DEBUG: load_state_dict unexpected_keys:", load_res.unexpected_keys)
     
     # 4. Prepare model for evaluation
     model = model.to(dtype)
     model.eval()
     print(f"Successfully loaded model from {custom_model_path}")
+    # --- SANITY CHECK: plain FP32 eval ---
+    print("Running plain FP32 sanity evaluation...")
+    correct = total = 0
+    model_fp32 = model.to(torch.float).to(device_for_loading)
+    model_fp32.eval()
+    with torch.no_grad():
+        for inputs, targets in val_loader:
+            inputs, targets = inputs.to(device_for_loading), targets.to(device_for_loading)
+            outputs = model_fp32(inputs)
+            _, predicted = outputs.max(1)
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
+    print(f"→ Plain FP32 eval accuracy: {100.0 * correct / total:.2f}%")
+    # --- END SANITY CHECK ---
     # --- THIS IS HOW WE LOAD OUR CUSTOM MODEL ---
-
 
     model = model.to(dtype)
     model.eval()
@@ -502,6 +560,14 @@ def main():
                 channel_splitting_split_input=args.channel_splitting_split_input)
     else:
         raise RuntimeError(f"{args.target_backend} backend not supported.")
+
+    # Make sure we know the model's device for debug sampling
+    device = next(model.parameters()).device
+    # DEBUG: inspect outputs right after preprocess_for_quantize
+    sample = imgs[:1] if 'imgs' in locals() else torch.randn(1, 3, 224, 224, device=device, dtype=dtype)
+    with torch.no_grad(), contextlib.nullcontext():
+        dbg_out = model(sample)
+    print(f"[DEBUG] after preprocess_for_quantize: NaNs? {torch.isnan(dbg_out).any().item()}, Infs? {torch.isinf(dbg_out).any().item()}, min/max {dbg_out.min().item():.3f}/{dbg_out.max().item():.3f}")
 
     device = (torch.device(f"cuda:{args.gpu}") if args.gpu is not None else torch.device("cpu"))
     model = model.to(device=device)
@@ -542,20 +608,48 @@ def main():
         act_mantissa_bit_width=args.act_mantissa_bit_width,
         act_exponent_bit_width=args.act_exponent_bit_width,
         act_scale_computation_type=args.act_scale_computation_type,
-        uint_sym_act_for_unsigned_values=args.uint_sym_act_for_unsigned_values)
+        uint_sym_act_for_unsigned_values=args.uint_sym_act_for_unsigned_values
+    )
+    # print("\n[DEBUG] Listing quantized model modules/types:")
+    # for name, module in quant_model.named_modules():
+    #     print(name, type(module))
+    # DEBUG: inspect outputs right after quantize_model
+    with torch.no_grad(), quant_inference_mode(quant_model):
+        dbg_out_q = quant_model(sample)
+    print(f"[DEBUG] after quantize_model: NaNs? {torch.isnan(dbg_out_q).any().item()}, Infs? {torch.isinf(dbg_out_q).any().item()}, min/max {dbg_out_q.min().item():.3f}/{dbg_out_q.max().item():.3f}")
+    # DEBUG: check parameter stats for NaNs/infs
+    for name, param in quant_model.named_parameters():
+        if torch.isnan(param).any() or torch.isinf(param).any():
+            print(f"[DEBUG] parameter {name} has NaN or Inf")
 
-    # Short sanity check for one conv layer's quantized integer weights
-    for m in quant_model.modules():
-        if hasattr(m, 'weight_quant'):
-            qt = m.weight_quant(m.weight)
-            int_tensor = qt.int()
-            print(f"[Q] {m.__class__.__name__}: int8 [{int_tensor.min().item()}, {int_tensor.max().item()}]")
-            break  # Only show the first layer for brevity
+    # --- DEBUG: inspect single-batch outputs pre- and post-calibration ---
+
+    # DEBUG: inspect input batch statistics
+    imgs_test, _ = next(iter(val_loader))
+    print(f"[DEBUG] input batch stats: min {imgs_test.min().item():.3f}, max {imgs_test.max().item():.3f}, mean {imgs_test.mean().item():.3f}, std {imgs_test.std().item():.3f}")
+
+    # Grab one batch from validation
+    imgs, labels = next(iter(val_loader))
+    imgs, labels = imgs.to(device), labels.to(device)
+
+    def inspect(name, net):
+        ctx = quant_inference_mode(net) if name != "fp32" else contextlib.nullcontext()
+        with torch.no_grad(), ctx:
+            logits = net(imgs)
+        print(f"\n[{name}] NaNs? {torch.isnan(logits).any().item()}, Infs? {torch.isinf(logits).any().item()}")
+        print(f"[{name}] min/max = {logits.min().item():.3f}/{logits.max().item():.3f}")
+        preds = logits.argmax(1).cpu().numpy()
+        print(f"[{name}] pred-class counts: {np.bincount(preds, minlength=num_classes)}")
+
+    inspect("fp32", model)
+    inspect("quant_precal", quant_model)
+
 
     if args.act_scale_computation_type == 'static':
         # Calibrate the quant_model on the calibration dataloader
         print("Starting activation calibration:")
         calibrate(calib_loader, quant_model)
+        inspect("quant_postcal", quant_model)
 
     if args.gpfq:
         print("Performing GPFQ:")
