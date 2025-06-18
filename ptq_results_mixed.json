@@ -1,0 +1,10 @@
+{
+  "e4m3": {
+    "clean_accuracy": 69.78,
+    "cifar10_c_mean_accuracy": 48.98
+  },
+  "e5m2": {
+    "clean_accuracy": 32.3,
+    "cifar10_c_mean_accuracy": 24.32
+  }
+}
