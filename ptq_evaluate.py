@@ -330,7 +330,32 @@ add_bool_arg(
     'uint-sym-act-for-unsigned-values',
     default=True,
     help='Use unsigned act quant when possible (default: enabled)')
+
+
 add_bool_arg(parser, 'compile', default=False, help='Use torch.compile (default: disabled)')
+add_bool_arg(
+    parser,
+    'eval-corruptions',
+    default=False,
+    help='Enable evaluation on CIFAR-10-C corruptions (default: disabled)')
+
+# Add argument for result directory
+
+parser.add_argument('--result-dir', default=RESULTS_DIR, type=str, help='Directory to save JSON results')
+
+# Add arguments for calibration and validation directories
+parser.add_argument(
+    '--calibration-dir',
+    default='/root/arcade/data/cifar10_split/train',
+    type=str,
+    help='Path to folder containing calibration images'
+)
+parser.add_argument(
+    '--validation-dir',
+    default='/root/arcade/data/cifar10_split/test',
+    type=str,
+    help='Path to folder containing validation images'
+)
 
 
 def generate_ref_input(args, device, dtype):
@@ -342,11 +367,8 @@ def generate_ref_input(args, device, dtype):
 
 def main():
     args = parser.parse_args()
+    results_dir = args.result_dir
     print(f"DEBUG: Full argument list: {args}")
-    # Early debug prints for calibration_dir, val_dirs, and dataset
-    print(f"DEBUG: Calibration directory: {args.calibration_dir if hasattr(args, 'calibration_dir') else 'N/A'}")
-    print(f"DEBUG: Validation directories: {val_dirs if 'val_dirs' in locals() else 'N/A'}")
-    print(f"DEBUG: Using dataset: {args.dataset if hasattr(args, 'dataset') else 'N/A'}")
     args.model_name = 'mobilenet_v3_small'
     validate_args(args)
     dtype = getattr(torch, args.dtype)
@@ -417,11 +439,9 @@ def main():
     # --- MODIFIED SECTION TO LOAD CIFAR-10 DATA ---
     print("Setting up CIFAR-10 data loaders...")
 
-    # Define paths to your CIFAR-10 split
-    DATA_DIR = '/root/arcade/data/cifar10_split'
-    TRAIN_DIR = os.path.join(DATA_DIR, 'train')
-    # VAL_DIR = os.path.join(DATA_DIR, 'validation') # We will use this for validation
-    TEST_DIR = os.path.join(DATA_DIR, 'test') # We will use this for the final evaluation
+    # Paths for CIFAR-10 split from arguments
+    TRAIN_DIR = args.calibration_dir
+    TEST_DIR = args.validation_dir
 
     # Define the same transforms used during training/testing
     # This uses the ImageNet normalization your best model was trained with
@@ -494,7 +514,7 @@ def main():
 
     # --- THIS IS HOW WE LOAD OUR CUSTOM MODEL ---
     # Get the model from torchvision
-    custom_model_path = '/root/arcade/final_scripts/final_models/best_model_imagenet.pth'
+    custom_model_path = '/root/arcade/final_scripts/final_models/model.pth'
     
     print("Loading custom model: MobileNetV3-Small for CIFAR-10")
     
@@ -517,27 +537,28 @@ def main():
     print("DEBUG: load_state_dict unexpected_keys:", load_res.unexpected_keys)
     
     # 4. Prepare model for evaluation
-    model = model.to(dtype)
+    model = model.to(device_for_loading).to(dtype)
     model.eval()
     print(f"Successfully loaded model from {custom_model_path}")
+
     # --- SANITY CHECK: plain FP32 eval ---
-    print("Running plain FP32 sanity evaluation...")
-    correct = total = 0
-    model_fp32 = model.to(torch.float).to(device_for_loading)
-    model_fp32.eval()
-    with torch.no_grad():
-        for inputs, targets in val_loader:
-            inputs, targets = inputs.to(device_for_loading), targets.to(device_for_loading)
-            outputs = model_fp32(inputs)
-            _, predicted = outputs.max(1)
-            total += targets.size(0)
-            correct += (predicted == targets).sum().item()
-    print(f"→ Plain FP32 eval accuracy: {100.0 * correct / total:.2f}%")
+    # print("Running plain FP32 sanity evaluation...")
+    # correct = total = 0
+    # model_fp32 = model.to(torch.float).to(device_for_loading)
+    # model_fp32.eval()
+    # with torch.no_grad():
+    #     for inputs, targets in val_loader:
+    #         inputs, targets = inputs.to(device_for_loading), targets.to(device_for_loading)
+    #         outputs = model_fp32(inputs)
+    #         _, predicted = outputs.max(1)
+    #         total += targets.size(0)
+    #         correct += (predicted == targets).sum().item()
+    # print(f"→ Plain FP32 eval accuracy: {100.0 * correct / total:.2f}%")
     # --- END SANITY CHECK ---
     # --- THIS IS HOW WE LOAD OUR CUSTOM MODEL ---
 
-    model = model.to(dtype)
-    model.eval()
+    # model = model.to(dtype)
+    # model.eval()
 
     # Preprocess the model for quantization
     if args.target_backend == 'flexml':
@@ -725,8 +746,50 @@ def main():
     final_acc = 100.0 * correct / total
     print(f"[RESULT] Final Validation Accuracy: {final_acc:.2f}%")
 
+    if args.eval_corruptions:
+        # --- CIFAR-10-C evaluation ---
+        CIFAR_C_DIR = '/root/arcade/data/CIFAR-10-C'
+        labels = np.load(os.path.join(CIFAR_C_DIR, 'labels.npy'))
+        corruption_results = {}
+        class CustomNumpyDataset(torch.utils.data.Dataset):
+            def __init__(self, images, labels, transform):
+                self.images = images
+                self.labels = labels
+                self.transform = transform
+                self.to_pil = torchvision.transforms.ToPILImage()
+            def __len__(self):
+                return len(self.labels)
+            def __getitem__(self, idx):
+                img = self.to_pil(self.images[idx])
+                if self.transform:
+                    img = self.transform(img)
+                return img, self.labels[idx]
+        for fname in sorted(os.listdir(CIFAR_C_DIR)):
+            if not fname.endswith('.npy') or fname == 'labels.npy':
+                continue
+            name = fname[:-4]
+            images = np.load(os.path.join(CIFAR_C_DIR, fname))
+            ds = CustomNumpyDataset(images, labels, data_transform)
+            loader_c = torch.utils.data.DataLoader(ds, batch_size=args.batch_size_validation, shuffle=False, num_workers=args.workers)
+            correct_c = total_c = 0
+            quant_model.eval()
+            with torch.no_grad(), quant_inference_mode(quant_model):
+                for inputs_c, targets_c in loader_c:
+                    inputs_c = inputs_c.to(device).to(dtype)
+                    targets_c = targets_c.to(device)
+                    outputs_c = quant_model(inputs_c)
+                    _, pred_c = outputs_c.max(1)
+                    total_c += targets_c.size(0)
+                    correct_c += (pred_c == targets_c).sum().item()
+            acc_c = 100.0 * correct_c / total_c
+            corruption_results[name] = acc_c
+            print(f"[C10-C] {name:<20} | Accuracy: {acc_c:.2f}%")
+        mean_acc_c = float(np.mean(list(corruption_results.values())))
+        print(f"[C10-C] Mean Accuracy: {mean_acc_c:.2f}%")
+        # add CIFAR-10-C results to the saved JSON
+
     # --- Save results and parameters ---
-    os.makedirs(RESULTS_DIR, exist_ok=True)
+    os.makedirs(results_dir, exist_ok=True)
     result_data = {
         'model_evaluated': args.model_name,
         'quant_format': args.quant_format,
@@ -740,7 +803,7 @@ def main():
         'validation_samples': len(validation_dataset),
         'final_accuracy': final_acc
     }
-    output_file = os.path.join(RESULTS_DIR, f'ptq_results_{args.quant_format}.json')
+    output_file = os.path.join(results_dir, f'ptq_results_{args.quant_format}.json')
     with open(output_file, 'w') as f:
         json.dump(result_data, f, indent=4)
     print(f"Results saved to {output_file}")
