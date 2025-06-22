@@ -40,9 +40,38 @@ from brevitas_examples.imagenet_classification.ptq.utils import get_model_config
 from brevitas_examples.imagenet_classification.utils import SEED
 from brevitas_examples.imagenet_classification.utils import validate
 
+
 # Ignore warnings about __torch_function__
 warnings.filterwarnings("ignore")
 
+# Datasets moved to top-level for multiprocessing safety
+class NumpyDataset(torch.utils.data.Dataset):
+    def __init__(self, images, labels, transform):
+        self.images = images
+        self.labels = torch.from_numpy(labels).long()
+        self.transform = transform
+        self.to_pil = torchvision.transforms.ToPILImage()
+    def __len__(self):
+        return len(self.labels)
+    def __getitem__(self, idx):
+        img = self.to_pil(self.images[idx])
+        if self.transform:
+            img = self.transform(img)
+        return img, self.labels[idx]
+
+class CustomNumpyDataset(torch.utils.data.Dataset):
+    def __init__(self, images, labels, transform):
+        self.images = images
+        self.labels = labels
+        self.transform = transform
+        self.to_pil = torchvision.transforms.ToPILImage()
+    def __len__(self):
+        return len(self.labels)
+    def __getitem__(self, idx):
+        img = self.to_pil(self.images[idx])
+        if self.transform:
+            img = self.transform(img)
+        return img, self.labels[idx]
 
 def parse_type(v, default_type):
     if v == 'None':
@@ -339,6 +368,14 @@ add_bool_arg(
     default=False,
     help='Enable evaluation on CIFAR-10-C corruptions (default: disabled)')
 
+# Add mixed calibration argument
+add_bool_arg(
+    parser,
+    'mixed-calib',
+    default=False,
+    help='Enable mixed calibration: half clean and half corrupted samples (default: disabled)'
+)
+
 # Add argument for result directory
 
 parser.add_argument('--result-dir', default=RESULTS_DIR, type=str, help='Directory to save JSON results')
@@ -355,6 +392,12 @@ parser.add_argument(
     default='/root/arcade/data/cifar10_split/test',
     type=str,
     help='Path to folder containing validation images'
+)
+parser.add_argument(
+    '--cifar10c-dir',
+    default='/root/arcade/data/CIFAR-10-C',
+    type=str,
+    help='Path to folder containing CIFAR-10-C corrupted data (.npy files)'
 )
 
 
@@ -451,52 +494,113 @@ def main():
         torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    # Create the calibration data loader using a balanced subset per class
-    calibration_dataset = torchvision.datasets.ImageFolder(TRAIN_DIR, transform=data_transform)
-    print(f"Calibration dataset path: {TRAIN_DIR}")
-    print(f"Calibration transform: {calibration_dataset.transform}")
-    num_calibration_samples = args.calibration_samples
-    num_classes = len(calibration_dataset.classes)
+    # Mixed calibration support
+    if not args.mixed_calib:
+        # Create the calibration data loader using a balanced subset per class
+        calibration_dataset = torchvision.datasets.ImageFolder(TRAIN_DIR, transform=data_transform)
+        print(f"Calibration dataset path: {TRAIN_DIR}")
+        print(f"Calibration transform: {calibration_dataset.transform}")
+        num_calibration_samples = args.calibration_samples
+        num_classes = len(calibration_dataset.classes)
 
-    # Determine how many samples per class
-    samples_per_class = num_calibration_samples // num_classes
-    print(f"DEBUG: Calibration samples per class: {samples_per_class} (total classes: {num_classes}, requested samples: {num_calibration_samples})")
+        # Determine how many samples per class
+        samples_per_class = num_calibration_samples // num_classes
+        print(f"DEBUG: Calibration samples per class: {samples_per_class} (total classes: {num_classes}, requested samples: {num_calibration_samples})")
 
-    # Collect indices by class
-    labels = calibration_dataset.targets
-    class_indices = {i: [] for i in range(num_classes)}
-    for idx, label in enumerate(labels):
-        class_indices[label].append(idx)
+        # Collect indices by class
+        labels = calibration_dataset.targets
+        class_indices = {i: [] for i in range(num_classes)}
+        for idx, label in enumerate(labels):
+            class_indices[label].append(idx)
 
-    # Sample from each class (this part is perfect)
-    selected_indices = []
-    for cls, idxs in class_indices.items():
-        random.shuffle(idxs)
-        selected_indices.extend(idxs[:samples_per_class])
+        # Sample from each class (this part is perfect)
+        selected_indices = []
+        for cls, idxs in class_indices.items():
+            random.shuffle(idxs)
+            selected_indices.extend(idxs[:samples_per_class])
 
-    print(f"DEBUG: Selected indices per class counts: {[len(class_indices[c][:samples_per_class]) for c in range(num_classes)]}")
-    # --- More efficient "fill up" logic ---
-    remaining = num_calibration_samples - len(selected_indices)
-    if remaining > 0:
-        # Use a set for fast lookups
-        selected_set = set(selected_indices)
-        
-        # Get all indices that were NOT selected
-        all_indices = set(range(len(calibration_dataset)))
-        available_indices = list(all_indices - selected_set)
-        random.shuffle(available_indices)
-        
-        # Add the remaining number of samples from the unused pool
-        selected_indices.extend(available_indices[:remaining])
-    print(f"DEBUG: Total selected indices after fill-up: {len(selected_indices)}")
+        print(f"DEBUG: Selected indices per class counts: {[len(class_indices[c][:samples_per_class]) for c in range(num_classes)]}")
+        # --- More efficient "fill up" logic ---
+        remaining = num_calibration_samples - len(selected_indices)
+        if remaining > 0:
+            # Use a set for fast lookups
+            selected_set = set(selected_indices)
+            
+            # Get all indices that were NOT selected
+            all_indices = set(range(len(calibration_dataset)))
+            available_indices = list(all_indices - selected_set)
+            random.shuffle(available_indices)
+            
+            # Add the remaining number of samples from the unused pool
+            selected_indices.extend(available_indices[:remaining])
+        print(f"DEBUG: Total selected indices after fill-up: {len(selected_indices)}")
 
-    calibration_subset = torch.utils.data.Subset(calibration_dataset, selected_indices)
+        calibration_subset = torch.utils.data.Subset(calibration_dataset, selected_indices)
 
-    calib_loader = torch.utils.data.DataLoader(
-        calibration_subset,
-        batch_size=args.batch_size_calibration,
-        shuffle=False,
-        num_workers=args.workers)
+        calib_loader = torch.utils.data.DataLoader(
+            calibration_subset,
+            batch_size=args.batch_size_calibration,
+            shuffle=False,
+            num_workers=args.workers)
+    else:
+        # Mixed calibration: sample half clean, half corrupt
+        num_calibration_samples = args.calibration_samples
+        # Warn if total samples is odd
+        if num_calibration_samples % 2 != 0:
+            print(f"WARNING: calibration_samples ({num_calibration_samples}) is odd; using floor half {num_calibration_samples//2}")
+        # Load clean dataset once and get class count
+        clean_dataset = torchvision.datasets.ImageFolder(TRAIN_DIR, transform=data_transform)
+        num_classes = len(clean_dataset.classes)
+        half = num_calibration_samples // 2
+        # Warn if half not divisible by number of classes
+        if half % num_classes != 0:
+            print(f"WARNING: half calibration samples ({half}) not divisible by {num_classes} classes; using floor per_class {half//num_classes}")
+        per_class = half // num_classes
+        if per_class < 1:
+            raise ValueError(f"Not enough samples ({num_calibration_samples}) for mixed calibration across {num_classes} classes")
+        # Sample clean
+        labels_clean = clean_dataset.targets
+        class_indices_clean = {i: [] for i in range(num_classes)}
+        for idx, label in enumerate(labels_clean):
+            class_indices_clean[label].append(idx)
+        selected_clean = []
+        for cls, idxs in class_indices_clean.items():
+            if len(idxs) < per_class:
+                raise ValueError(f"Not enough clean samples for class {cls}: have {len(idxs)}, need {per_class}")
+            random.shuffle(idxs)
+            selected_clean.extend(idxs[:per_class])
+        subset_clean = torch.utils.data.Subset(clean_dataset, selected_clean)
+        # Sample corrupt
+        cifar_c_dir = args.cifar10c_dir
+        labels_corrupt = np.load(os.path.join(cifar_c_dir, 'labels.npy'))
+        corrupt_images_list = []
+        corrupt_labels_list = []
+        for fname in os.listdir(cifar_c_dir):
+            if not fname.endswith('.npy') or fname == 'labels.npy':
+                continue
+            corrupt_images_list.append(np.load(os.path.join(cifar_c_dir, fname)))
+            corrupt_labels_list.append(labels_corrupt)
+        all_images = np.concatenate(corrupt_images_list, axis=0)
+        all_labels = np.concatenate(corrupt_labels_list, axis=0)
+        corrupt_dataset = NumpyDataset(all_images, all_labels, transform=data_transform)
+        class_indices_corrupt = {i: [] for i in range(num_classes)}
+        for idx, label in enumerate(corrupt_dataset.labels):
+            class_indices_corrupt[int(label)].append(idx)
+        selected_corrupt = []
+        for cls, idxs in class_indices_corrupt.items():
+            if len(idxs) < per_class:
+                raise ValueError(f"Not enough corrupt samples for class {cls}: have {len(idxs)}, need {per_class}")
+            random.shuffle(idxs)
+            selected_corrupt.extend(idxs[:per_class])
+        subset_corrupt = torch.utils.data.Subset(corrupt_dataset, selected_corrupt)
+        # Combine and loader
+        calibration_dataset = torch.utils.data.ConcatDataset([subset_clean, subset_corrupt])
+        calib_loader = torch.utils.data.DataLoader(
+            calibration_dataset,
+            batch_size=args.batch_size_calibration,
+            shuffle=False,
+            num_workers=args.workers)
+        print(f"Mixed calibration: {len(subset_clean)} clean + {len(subset_corrupt)} corrupt (total {len(calibration_dataset)})")
 
     # Create the validation data loader
     validation_dataset = torchvision.datasets.ImageFolder(TEST_DIR, transform=data_transform)
@@ -748,27 +852,14 @@ def main():
 
     if args.eval_corruptions:
         # --- CIFAR-10-C evaluation ---
-        CIFAR_C_DIR = '/root/arcade/data/CIFAR-10-C'
-        labels = np.load(os.path.join(CIFAR_C_DIR, 'labels.npy'))
+        cifar_c_dir = args.cifar10c_dir
+        labels = np.load(os.path.join(cifar_c_dir, 'labels.npy'))
         corruption_results = {}
-        class CustomNumpyDataset(torch.utils.data.Dataset):
-            def __init__(self, images, labels, transform):
-                self.images = images
-                self.labels = labels
-                self.transform = transform
-                self.to_pil = torchvision.transforms.ToPILImage()
-            def __len__(self):
-                return len(self.labels)
-            def __getitem__(self, idx):
-                img = self.to_pil(self.images[idx])
-                if self.transform:
-                    img = self.transform(img)
-                return img, self.labels[idx]
-        for fname in sorted(os.listdir(CIFAR_C_DIR)):
+        for fname in sorted(os.listdir(cifar_c_dir)):
             if not fname.endswith('.npy') or fname == 'labels.npy':
                 continue
             name = fname[:-4]
-            images = np.load(os.path.join(CIFAR_C_DIR, fname))
+            images = np.load(os.path.join(cifar_c_dir, fname))
             ds = CustomNumpyDataset(images, labels, data_transform)
             loader_c = torch.utils.data.DataLoader(ds, batch_size=args.batch_size_validation, shuffle=False, num_workers=args.workers)
             correct_c = total_c = 0
@@ -799,7 +890,7 @@ def main():
         'scale_factor_type': args.scale_factor_type,
         'bias_bit_width': args.bias_bit_width,
         'graph_equalization_iters': args.graph_eq_iterations,
-        'calibration_samples': len(calibration_subset),
+        'calibration_samples': len(calib_loader.dataset),
         'validation_samples': len(validation_dataset),
         'final_accuracy': final_acc
     }

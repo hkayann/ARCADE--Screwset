@@ -352,7 +352,7 @@ def quantize_model(
                             act_scale_computation_type=act_scale_computation_type,
                             **weight_bit_width_dict,
                             **act_bit_width_dict)
-
+    
     if backend != 'layerwise':
         # Fx and flexml backend requires three mappings for quantization
         quantize_kwargs = {
@@ -494,19 +494,24 @@ def create_quant_maps(
         torch.nn.Conv2d: (qnn.QuantConv2d, quant_wbiol_kwargs),
         torch.nn.ConvTranspose1d: (qnn.QuantConvTranspose1d, quant_wbiol_kwargs),
         torch.nn.ConvTranspose2d: (qnn.QuantConvTranspose2d, quant_wbiol_kwargs),}
-
-    quant_act_map = {
-        torch.nn.ReLU: (qnn.QuantReLU, {
-            **unsigned_quant_act_kwargs}),
-        torch.nn.ReLU6: (qnn.QuantReLU, {
-            **unsigned_quant_act_kwargs}),
-        torch.nn.Sigmoid: (qnn.QuantSigmoid, {
-            **unsigned_quant_act_kwargs}),}
-    quant_identity_map = {
-        'signed': (qnn.QuantIdentity, {
-            **quant_act_kwargs}),
-        'unsigned': (qnn.QuantIdentity, {
-            **unsigned_quant_act_kwargs}),}
+    # Build activation maps, or disable if requested
+    if act_bit_width is None:
+        # No activation quantization
+        quant_act_map = {}
+        quant_identity_map = {
+            'signed':   (qnn.QuantIdentity, {'act_quant': None, 'return_quant_tensor': True}),
+            'unsigned': (qnn.QuantIdentity, {'act_quant': None, 'return_quant_tensor': True})
+        }
+    else:
+        quant_act_map = {
+            torch.nn.ReLU:    (qnn.QuantReLU,    {**unsigned_quant_act_kwargs}),
+            torch.nn.ReLU6:   (qnn.QuantReLU,    {**unsigned_quant_act_kwargs}),
+            torch.nn.Sigmoid: (qnn.QuantSigmoid, {**unsigned_quant_act_kwargs}),
+        }
+        quant_identity_map = {
+            'signed':   (qnn.QuantIdentity, {**quant_act_kwargs}),
+            'unsigned': (qnn.QuantIdentity, {**unsigned_quant_act_kwargs}),
+        }
     quant_layerwise_layer_map = {
         torch.nn.Linear: (qnn.QuantLinear, layerwise_quant_wbiol_kwargs),
         torch.nn.MultiheadAttention: (qnn.QuantMultiheadAttention, layerwise_quant_mha_kwargs),
