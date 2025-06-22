@@ -1,0 +1,26 @@
+{
+    "model_evaluated": "/root/arcade/final_scripts/final_models/best_model_imagenet.pth",
+    "evaluation_dataset": "CIFAR-10-C",
+    "mean_accuracy": 74.62589473684211,
+    "corruption_accuracies": {
+        "brightness": 93.982,
+        "contrast": 72.084,
+        "defocus_blur": 84.038,
+        "elastic_transform": 80.278,
+        "fog": 83.282,
+        "frost": 81.77,
+        "gaussian_blur": 78.618,
+        "gaussian_noise": 41.042,
+        "glass_blur": 56.19,
+        "impulse_noise": 55.166,
+        "jpeg_compression": 78.138,
+        "motion_blur": 74.65,
+        "pixelate": 83.2,
+        "saturate": 91.924,
+        "shot_noise": 54.454,
+        "snow": 84.922,
+        "spatter": 86.336,
+        "speckle_noise": 59.586,
+        "zoom_blur": 78.232
+    }
+}
