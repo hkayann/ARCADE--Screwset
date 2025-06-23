@@ -1,0 +1,27 @@
+{
+    "model_path": "/root/arcade/final_scripts/final_models/model.pth",
+    "fp32_test_acc": 0.92675,
+    "fp8_test_acc": 0.709,
+    "cifar10c_acc_mean": 49.804421052631575,
+    "corruption_accuracies": {
+        "brightness": 62.42,
+        "contrast": 35.728,
+        "defocus_blur": 59.998,
+        "elastic_transform": 54.464,
+        "fog": 46.812,
+        "frost": 48.324,
+        "gaussian_blur": 56.31,
+        "gaussian_noise": 28.434,
+        "glass_blur": 40.552,
+        "impulse_noise": 34.498,
+        "jpeg_compression": 52.768,
+        "motion_blur": 51.226,
+        "pixelate": 65.598,
+        "saturate": 63.888,
+        "shot_noise": 36.386,
+        "snow": 56.42,
+        "spatter": 58.992,
+        "speckle_noise": 38.774,
+        "zoom_blur": 54.692
+    }
+}
