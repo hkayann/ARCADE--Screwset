@@ -1,0 +1,25 @@
+{
+    "model_path": "/root/arcade/final_scripts/final_models/mobv3_sigmoid.pth",
+    "corruption_results": {
+        "brightness": 94.606,
+        "contrast": 74.324,
+        "defocus_blur": 86.096,
+        "elastic_transform": 83.17,
+        "fog": 86.734,
+        "frost": 83.626,
+        "gaussian_blur": 80.982,
+        "gaussian_noise": 46.852,
+        "glass_blur": 57.46,
+        "impulse_noise": 49.788,
+        "jpeg_compression": 78.456,
+        "motion_blur": 79.8,
+        "pixelate": 72.274,
+        "saturate": 92.006,
+        "shot_noise": 58.664,
+        "snow": 85.778,
+        "spatter": 86.012,
+        "speckle_noise": 61.43,
+        "zoom_blur": 81.384
+    },
+    "mean_corruption_accuracy": 75.7601052631579
+}
