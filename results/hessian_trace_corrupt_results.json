@@ -1,0 +1,10 @@
+{
+  "seed": 42,
+  "samples_per_corruption": 100,
+  "micro_batch_size": 32,
+  "num_batches": 60,
+  "probes": 50,
+  "hessian_trace": 8171.530246100235,
+  "elapsed_s": 917.7215254306793,
+  "timestamp": 1750941732.8375313
+}
