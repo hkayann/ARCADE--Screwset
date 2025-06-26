@@ -1,0 +1,19 @@
+{
+  "model_path": "/root/arcade/final_scripts/final_models/mobv3_sigmoid.pth",
+  "fp32_accuracy": 0.9165,
+  "fp8_accuracy": 0.5694166666666667,
+  "quantization": {
+    "backend": "fx",
+    "quant_format": "float",
+    "weight_bit_width": 8,
+    "act_bit_width": 8,
+    "act_quant_percentile": 99.999,
+    "act_quant_type": "sym",
+    "scale_factor_type": "float_scale",
+    "weight_mantissa_bit_width": 3,
+    "weight_exponent_bit_width": 4,
+    "act_mantissa_bit_width": 3,
+    "act_exponent_bit_width": 4
+  },
+  "seed": 42
+}
