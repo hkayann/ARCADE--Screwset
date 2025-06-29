@@ -1,0 +1,53 @@
+{
+  "model_path": "/root/arcade/final_scripts/final_models/mobv3_sigmoid.pth",
+  "fp8_gptq_clean_accuracy": 0.6023333333333334,
+  "fp8_gptq_corrupt_accuracy_all": 0.40287263157894737,
+  "fp8_gptq_corrupt_per_type": {
+    "brightness": 0.55694,
+    "contrast": 0.28616,
+    "defocus_blur": 0.45534,
+    "elastic_transform": 0.41384,
+    "fog": 0.31794,
+    "frost": 0.38018,
+    "gaussian_blur": 0.41024,
+    "gaussian_noise": 0.30404,
+    "glass_blur": 0.29306,
+    "impulse_noise": 0.29424,
+    "jpeg_compression": 0.44056,
+    "motion_blur": 0.35276,
+    "pixelate": 0.5686,
+    "saturate": 0.53536,
+    "shot_noise": 0.35726,
+    "snow": 0.4494,
+    "spatter": 0.49344,
+    "speckle_noise": 0.35922,
+    "zoom_blur": 0.38622
+  },
+  "quantization": {
+    "backend": "fx",
+    "quant_format": "float",
+    "weight_bit_width": 8,
+    "act_bit_width": 8,
+    "act_quant_percentile": 99.999,
+    "act_quant_type": "sym",
+    "scale_factor_type": "float_scale",
+    "weight_mantissa_bit_width": 3,
+    "weight_exponent_bit_width": 4,
+    "act_mantissa_bit_width": 3,
+    "act_exponent_bit_width": 4
+  },
+  "seed": 42,
+  "samples_per_class": 500,
+  "calib_class_counts": {
+    "0": 500,
+    "1": 500,
+    "2": 500,
+    "3": 500,
+    "4": 500,
+    "5": 500,
+    "6": 500,
+    "7": 500,
+    "8": 500,
+    "9": 500
+  }
+}
