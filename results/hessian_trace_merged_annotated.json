@@ -1,0 +1,281 @@
+{
+  "seed": 42,
+  "samples_per_class_clean": 100,
+  "samples_per_class_corrupt": 10,
+  "micro_batch_size": 32,
+  "probes": 50,
+  "timestamp_clean": 1751120061.5566869,
+  "timestamp_corrupt": 1751160322.3302128,
+  "layers": {
+    "classifier.0": {
+      "type": "Fully-Connected Layer",
+      "clean_trace": 0.23986048048685912,
+      "corrupt_trace": -1.290839002625823
+    },
+    "classifier.3": {
+      "type": "Fully-Connected Layer",
+      "clean_trace": 12.080086050246296,
+      "corrupt_trace": 31.658821486550462
+    },
+    "features.0.0": {
+      "type": "Standard Convolution",
+      "clean_trace": 57.1399905001471,
+      "corrupt_trace": 53.962453058630246
+    },
+    "features.1.block.0.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 574.4657927433309,
+      "corrupt_trace": 1066.733985284726
+    },
+    "features.1.block.1.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 0.0,
+      "corrupt_trace": 0.0
+    },
+    "features.1.block.1.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 2.4327360806688114,
+      "corrupt_trace": 4.183436417167385
+    },
+    "features.1.block.2.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 74.27781355982502,
+      "corrupt_trace": 124.19673627132177
+    },
+    "features.10.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 15.194967659814578,
+      "corrupt_trace": 20.664739460582542
+    },
+    "features.10.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 11.439739031399075,
+      "corrupt_trace": 11.816625576366983
+    },
+    "features.10.block.2.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 2.6925645445519515,
+      "corrupt_trace": 5.522463961541846
+    },
+    "features.10.block.2.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 3.2359528817569805,
+      "corrupt_trace": 5.480752080233149
+    },
+    "features.10.block.3.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 12.877958559062902,
+      "corrupt_trace": 20.645659697805847
+    },
+    "features.11.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 15.473081637495195,
+      "corrupt_trace": 15.835043147638446
+    },
+    "features.11.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 6.2764373430677365,
+      "corrupt_trace": -2.4908036048461986
+    },
+    "features.11.block.2.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 3.0120417404401993,
+      "corrupt_trace": 6.946122506450318
+    },
+    "features.11.block.2.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 3.3431588913909636,
+      "corrupt_trace": 7.405236437126842
+    },
+    "features.11.block.3.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 5.399108924667234,
+      "corrupt_trace": 10.149637280559789
+    },
+    "features.12.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 4.008972796440939,
+      "corrupt_trace": 5.896245769205193
+    },
+    "features.2.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 11.153627976894498,
+      "corrupt_trace": 19.69656411336114
+    },
+    "features.2.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 998.3778377403127,
+      "corrupt_trace": 1661.3762464105287
+    },
+    "features.2.block.2.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 43.940811323798705,
+      "corrupt_trace": 93.45329328396916
+    },
+    "features.3.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 5.819483905889938,
+      "corrupt_trace": 10.274533178584031
+    },
+    "features.3.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 34.69356640540485,
+      "corrupt_trace": 97.05912453171612
+    },
+    "features.3.block.2.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 51.78744263187692,
+      "corrupt_trace": 110.14004613941911
+    },
+    "features.4.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 7.231056573514544,
+      "corrupt_trace": 11.44179508340731
+    },
+    "features.4.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 8.337854262954934,
+      "corrupt_trace": 16.02768834218383
+    },
+    "features.4.block.2.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 0.0,
+      "corrupt_trace": 0.0
+    },
+    "features.4.block.2.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 0.7332475272003194,
+      "corrupt_trace": 1.608474990951208
+    },
+    "features.4.block.3.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 37.513719122354516,
+      "corrupt_trace": 81.02799943959717
+    },
+    "features.5.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 4.493246230528128,
+      "corrupt_trace": 8.224793288890274
+    },
+    "features.5.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 7.58974867882236,
+      "corrupt_trace": 16.627455852486197
+    },
+    "features.5.block.2.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 0.937715265787416,
+      "corrupt_trace": 2.4970982560875123
+    },
+    "features.5.block.2.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 2.138180215409043,
+      "corrupt_trace": 4.151814095981807
+    },
+    "features.5.block.3.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 6.363277964623374,
+      "corrupt_trace": 13.15787346679841
+    },
+    "features.6.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 5.88719349807594,
+      "corrupt_trace": 10.94939316374684
+    },
+    "features.6.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 12.551489742600971,
+      "corrupt_trace": 29.092366778336476
+    },
+    "features.6.block.2.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 1.2411105313322908,
+      "corrupt_trace": 2.8983312539507176
+    },
+    "features.6.block.2.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 3.082710557165884,
+      "corrupt_trace": 6.561017099527797
+    },
+    "features.6.block.3.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 9.299729081189728,
+      "corrupt_trace": 20.678942822029192
+    },
+    "features.7.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 9.276614967087736,
+      "corrupt_trace": 19.485736144274476
+    },
+    "features.7.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 16.87195823872673,
+      "corrupt_trace": 35.176936472512786
+    },
+    "features.7.block.2.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 0.15829493343768333,
+      "corrupt_trace": 0.33268461885877093
+    },
+    "features.7.block.2.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 1.6910928923787132,
+      "corrupt_trace": 4.373898183601442
+    },
+    "features.7.block.3.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 47.21391611331376,
+      "corrupt_trace": 95.7927158918977
+    },
+    "features.8.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 10.03962308863731,
+      "corrupt_trace": 19.894835388705133
+    },
+    "features.8.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 14.01613986418524,
+      "corrupt_trace": 27.68382999213041
+    },
+    "features.8.block.2.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 1.4534283982414766,
+      "corrupt_trace": 2.6979517907785873
+    },
+    "features.8.block.2.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 2.5770045003038695,
+      "corrupt_trace": 3.9932376378908128
+    },
+    "features.8.block.3.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 12.823729502524367,
+      "corrupt_trace": 25.362263407851266
+    },
+    "features.9.block.0.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 19.232606601337316,
+      "corrupt_trace": 30.369467655335864
+    },
+    "features.9.block.1.0": {
+      "type": "Depthwise Convolution",
+      "clean_trace": 20.771360122915354,
+      "corrupt_trace": 40.673725306332116
+    },
+    "features.9.block.2.fc1": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 3.7338628739495543,
+      "corrupt_trace": 8.280505040589098
+    },
+    "features.9.block.2.fc2": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 5.456690804824439,
+      "corrupt_trace": 13.812663037973456
+    },
+    "features.9.block.3.0": {
+      "type": "Pointwise Convolution",
+      "clean_trace": 46.129477763081674,
+      "corrupt_trace": 94.97164165000122
+    }
+  }
+}
