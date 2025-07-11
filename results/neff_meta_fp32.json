@@ -1,0 +1,7 @@
+{
+    "model": "mobilenetv3_small_hardsigmoid_to_sigmoid",
+    "dataset": "cifar10",
+    "K": 128,
+    "z": 1,
+    "neff": 102.98728942871094
+}
