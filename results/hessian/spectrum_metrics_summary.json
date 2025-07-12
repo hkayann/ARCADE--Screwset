@@ -1,8 +1,0 @@
-[
-  {
-    "corruption": "brightness",
-    "n_eff_fp32": 19.4630917029725,
-    "n_eff_fp8": 33.26275354838678,
-    "n_eff_fp32_json": 108.3257827758789,
-    "n_eff_fp8_json": 101.23722076416016,
-    "trace_fp32": 
