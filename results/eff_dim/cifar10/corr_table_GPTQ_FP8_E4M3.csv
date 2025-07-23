@@ -1,0 +1,12 @@
+metric,Pearson,Spearman
+Delta_head10,-0.3272,-0.4882
+Delta_kappa,-0.3686,-0.45
+Slope_Delta_neff,-0.4118,-0.4412
+Delta_largest_eig,-0.2042,-0.3324
+Delta_neff,-0.196,-0.3059
+Delta_alpha,-0.1809,-0.2853
+AUC_Delta_neff,-0.0698,-0.2235
+Delta_trace,-0.007,-0.1088
+Delta_pr,0.2966,0.4353
+Delta_tail,0.3272,0.4882
+Delta_spectral_entropy,0.3552,0.5029

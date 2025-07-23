@@ -1,0 +1,545 @@
+[
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_original_screwset_best.pth",
+    "replacement": "original",
+    "quant_type": "FP32",
+    "quant_config": null,
+    "weight_bw": 32,
+    "act_bw": 32,
+    "clean_accuracy": 0.91796875,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.225,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.025,
+      "screwset_reflection": 0.0359375,
+      "screwset_scrap_paper": 0.1265625,
+      "screwset_shadow": 0.0234375
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_original_screwset_best.pth",
+    "replacement": "original",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP8_E4M3",
+      "weight_mantissa": 3,
+      "weight_exponent": 4,
+      "act_mantissa": 3,
+      "act_exponent": 4,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.90556640625,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.19375,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.03046875,
+      "screwset_reflection": 0.0296875,
+      "screwset_scrap_paper": 0.365625,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_original_screwset_best.pth",
+    "replacement": "original",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP8_E5M2",
+      "weight_mantissa": 2,
+      "weight_exponent": 5,
+      "act_mantissa": 2,
+      "act_exponent": 5,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.790966796875,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.19296875,
+      "screwset_occlusion_bottom_right": 0.02421875,
+      "screwset_occlusion_top_left": 0.03125,
+      "screwset_reflection": 0.03046875,
+      "screwset_scrap_paper": 0.30625,
+      "screwset_shadow": 0.02578125
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_original_screwset_best.pth",
+    "replacement": "original",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP4_E2M1",
+      "weight_mantissa": 1,
+      "weight_exponent": 2,
+      "act_mantissa": 1,
+      "act_exponent": 2,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 4,
+    "act_bw": 4,
+    "clean_accuracy": 0.025,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.025,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.025,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.03046875,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_original_screwset_best.pth",
+    "replacement": "original",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP8_E4M3",
+      "weight_mantissa": 3,
+      "weight_exponent": 4,
+      "act_mantissa": 3,
+      "act_exponent": 4,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.922607421875,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.2046875,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.03828125,
+      "screwset_reflection": 0.0296875,
+      "screwset_scrap_paper": 0.3640625,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_original_screwset_best.pth",
+    "replacement": "original",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP8_E5M2",
+      "weight_mantissa": 2,
+      "weight_exponent": 5,
+      "act_mantissa": 2,
+      "act_exponent": 5,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.86083984375,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.20625,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.0296875,
+      "screwset_reflection": 0.03046875,
+      "screwset_scrap_paper": 0.28828125,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_original_screwset_best.pth",
+    "replacement": "original",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP4_E2M1",
+      "weight_mantissa": 1,
+      "weight_exponent": 2,
+      "act_mantissa": 1,
+      "act_exponent": 2,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 4,
+    "act_bw": 4,
+    "clean_accuracy": 0.025,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.025,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.025,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.040625,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid",
+    "quant_type": "FP32",
+    "quant_config": null,
+    "weight_bw": 32,
+    "act_bw": 32,
+    "clean_accuracy": 0.941650390625,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.24296875,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.03046875,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.25703125,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP8_E4M3",
+      "weight_mantissa": 3,
+      "weight_exponent": 4,
+      "act_mantissa": 3,
+      "act_exponent": 4,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.93330078125,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.228125,
+      "screwset_occlusion_bottom_right": 0.02578125,
+      "screwset_occlusion_top_left": 0.025,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.1859375,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP8_E5M2",
+      "weight_mantissa": 2,
+      "weight_exponent": 5,
+      "act_mantissa": 2,
+      "act_exponent": 5,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.7951171875,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.259375,
+      "screwset_occlusion_bottom_right": 0.02734375,
+      "screwset_occlusion_top_left": 0.025,
+      "screwset_reflection": 0.02265625,
+      "screwset_scrap_paper": 0.21171875,
+      "screwset_shadow": 0.03515625
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP4_E2M1",
+      "weight_mantissa": 1,
+      "weight_exponent": 2,
+      "act_mantissa": 1,
+      "act_exponent": 2,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 4,
+    "act_bw": 4,
+    "clean_accuracy": 0.025,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.025,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.0265625,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.025,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP8_E4M3",
+      "weight_mantissa": 3,
+      "weight_exponent": 4,
+      "act_mantissa": 3,
+      "act_exponent": 4,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.93662109375,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.22421875,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.025,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.171875,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP8_E5M2",
+      "weight_mantissa": 2,
+      "weight_exponent": 5,
+      "act_mantissa": 2,
+      "act_exponent": 5,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.855126953125,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.259375,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.025,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.24296875,
+      "screwset_shadow": 0.03125
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP4_E2M1",
+      "weight_mantissa": 1,
+      "weight_exponent": 2,
+      "act_mantissa": 1,
+      "act_exponent": 2,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 4,
+    "act_bw": 4,
+    "clean_accuracy": 0.025,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.025,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.025,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.025,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_hardswish_to_silu_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid_hardswish_to_silu",
+    "quant_type": "FP32",
+    "quant_config": null,
+    "weight_bw": 32,
+    "act_bw": 32,
+    "clean_accuracy": 0.926416015625,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.21796875,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.0265625,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.21015625,
+      "screwset_shadow": 0.02578125
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_hardswish_to_silu_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid_hardswish_to_silu",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP8_E4M3",
+      "weight_mantissa": 3,
+      "weight_exponent": 4,
+      "act_mantissa": 3,
+      "act_exponent": 4,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.8833984375,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.18515625,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.02421875,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.2078125,
+      "screwset_shadow": 0.0265625
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_hardswish_to_silu_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid_hardswish_to_silu",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP8_E5M2",
+      "weight_mantissa": 2,
+      "weight_exponent": 5,
+      "act_mantissa": 2,
+      "act_exponent": 5,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.80859375,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.1953125,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.03125,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.28359375,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_hardswish_to_silu_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid_hardswish_to_silu",
+    "quant_type": "PTQ",
+    "quant_config": {
+      "name": "PTQ_FP4_E2M1",
+      "weight_mantissa": 1,
+      "weight_exponent": 2,
+      "act_mantissa": 1,
+      "act_exponent": 2,
+      "quant_type": "PTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 4,
+    "act_bw": 4,
+    "clean_accuracy": 0.049609375,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.04453125,
+      "screwset_occlusion_bottom_right": 0.02890625,
+      "screwset_occlusion_top_left": 0.01875,
+      "screwset_reflection": 0.03046875,
+      "screwset_scrap_paper": 0.05859375,
+      "screwset_shadow": 0.03203125
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_hardswish_to_silu_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid_hardswish_to_silu",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP8_E4M3",
+      "weight_mantissa": 3,
+      "weight_exponent": 4,
+      "act_mantissa": 3,
+      "act_exponent": 4,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.877783203125,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.2078125,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.02578125,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.23515625,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_hardswish_to_silu_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid_hardswish_to_silu",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP8_E5M2",
+      "weight_mantissa": 2,
+      "weight_exponent": 5,
+      "act_mantissa": 2,
+      "act_exponent": 5,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 8,
+    "act_bw": 8,
+    "clean_accuracy": 0.78564453125,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.221875,
+      "screwset_occlusion_bottom_right": 0.02421875,
+      "screwset_occlusion_top_left": 0.02421875,
+      "screwset_reflection": 0.025,
+      "screwset_scrap_paper": 0.22109375,
+      "screwset_shadow": 0.025
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  },
+  {
+    "model_path": "/root/arcade/final_scripts/final_models/mobilenetv3_hardsigmoid_to_sigmoid_hardswish_to_silu_screwset_best.pth",
+    "replacement": "hardsigmoid_to_sigmoid_hardswish_to_silu",
+    "quant_type": "GPTQ",
+    "quant_config": {
+      "name": "GPTQ_FP4_E2M1",
+      "weight_mantissa": 1,
+      "weight_exponent": 2,
+      "act_mantissa": 1,
+      "act_exponent": 2,
+      "quant_type": "GPTQ",
+      "quant_format": "float"
+    },
+    "weight_bw": 4,
+    "act_bw": 4,
+    "clean_accuracy": 0.04248046875,
+    "corrupt_accuracy_per_type": {
+      "screwset_multi_object": 0.0484375,
+      "screwset_occlusion_bottom_right": 0.025,
+      "screwset_occlusion_top_left": 0.02734375,
+      "screwset_reflection": 0.028125,
+      "screwset_scrap_paper": 0.040625,
+      "screwset_shadow": 0.02578125
+    },
+    "seed": 42,
+    "samples_per_class": 500
+  }
+]
