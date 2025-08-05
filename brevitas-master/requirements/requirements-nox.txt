@@ -1,0 +1,3 @@
+nox
+packaging
+pyyaml

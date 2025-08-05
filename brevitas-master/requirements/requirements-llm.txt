@@ -1,0 +1,9 @@
+accelerate
+datasets
+lm_eval
+onnx
+onnxruntime<1.21
+optimum
+pandas
+tqdm
+transformers[sentencepiece]==4.47.1

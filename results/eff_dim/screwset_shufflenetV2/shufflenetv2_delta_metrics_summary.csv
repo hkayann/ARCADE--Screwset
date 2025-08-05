@@ -1,0 +1,2 @@
+corruption,AUC_Delta_neff,Slope_Delta_neff,DeltaAccuracy_fp8,Delta_trace,Delta_largest_eig,Delta_head10,Delta_tail,Delta_pr,Delta_spectral_entropy,Delta_kappa,Delta_neff,Delta_alpha
+clean,188.71774615889802,-3.3251317308491686,-0.05112304687500002,1499.1912,871.96277,0.005928874,-0.0059291273,-3.1686780590804986,-0.32539463,848.94495,35.69743,0.01322479205726923
