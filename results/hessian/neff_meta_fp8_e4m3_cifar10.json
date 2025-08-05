@@ -1,7 +1,0 @@
-{
-    "model": "mobilenetv3_small_fp8_e4m3_cifar10",
-    "dataset": "cifar10",
-    "K": 128,
-    "z": 1,
-    "neff": 123.20611572265625
-}

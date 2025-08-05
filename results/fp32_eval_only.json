@@ -1,6 +1,0 @@
-{
-  "model_path": "/root/arcade/final_scripts/final_models/best_model.pth",
-  "fp32_clean_accuracy": 0.8693333333333333,
-  "batch_size": 256,
-  "seed": 42
-}
