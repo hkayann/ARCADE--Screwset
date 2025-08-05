@@ -1,0 +1,50 @@
+[
+    {
+        "variant": "shufflenet_v2_x1_0",
+        "best_val_acc": 0.9314166666666667,
+        "test_loss": 0.26519317030906675,
+        "test_acc": 0.9314166666666667,
+        "corrupt_results": {
+            "brightness": 0.94988,
+            "contrast": 0.8014,
+            "defocus_blur": 0.84896,
+            "elastic_transform": 0.8333,
+            "fog": 0.88942,
+            "frost": 0.84056,
+            "gaussian_blur": 0.78114,
+            "gaussian_noise": 0.3021,
+            "glass_blur": 0.55664,
+            "impulse_noise": 0.3508,
+            "jpeg_compression": 0.77396,
+            "motion_blur": 0.76054,
+            "pixelate": 0.7689,
+            "saturate": 0.91912,
+            "shot_noise": 0.42714,
+            "snow": 0.86886,
+            "spatter": 0.88046,
+            "speckle_noise": 0.46698,
+            "zoom_blur": 0.79126
+        },
+        "model_path": "/root/arcade/final_scripts/final_models/shufflenet_models/shufflenet_v2_x1_0_cifar10_best.pth",
+        "description": "ShuffleNetV2 x1.0 pretrained on ImageNet1K",
+        "normalization_mean": [
+            0.4914,
+            0.4822,
+            0.4465
+        ],
+        "normalization_std": [
+            0.247,
+            0.243,
+            0.261
+        ],
+        "resize_dim": [
+            224,
+            224
+        ],
+        "num_epochs": 20,
+        "learning_rate": 0.001,
+        "batch_size": 256,
+        "optimizer": "Adam",
+        "seed": 42
+    }
+]

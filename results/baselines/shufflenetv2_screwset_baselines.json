@@ -1,0 +1,37 @@
+[
+    {
+        "variant": "shufflenet_v2_x1_0",
+        "best_val_acc": 0.99150390625,
+        "test_loss": 0.02228161398782049,
+        "test_acc": 0.992138671875,
+        "corrupt_results": {
+            "screwset_multi_object": 0.26875,
+            "screwset_occlusion_bottom_right": 0.025,
+            "screwset_occlusion_top_left": 0.02421875,
+            "screwset_reflection": 0.090625,
+            "screwset_scrap_paper": 0.34140625,
+            "screwset_shadow": 0.1515625
+        },
+        "model_path": "/root/arcade/final_scripts/final_models/shufflenet_models/shufflenet_v2_x1_0_best.pth",
+        "description": "ShuffleNetV2 x1.0 pretrained on ImageNet1K",
+        "normalization_mean": [
+            0.775,
+            0.7343,
+            0.6862
+        ],
+        "normalization_std": [
+            0.0802,
+            0.0838,
+            0.0871
+        ],
+        "resize_dim": [
+            240,
+            320
+        ],
+        "num_epochs": 20,
+        "learning_rate": 0.001,
+        "batch_size": 256,
+        "optimizer": "Adam",
+        "seed": 42
+    }
+]
