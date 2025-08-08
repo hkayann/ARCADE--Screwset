@@ -39,7 +39,7 @@ torch.cuda.manual_seed_all(SEED)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-CACHE_FILE = '/root/arcade/final_scripts/utils/calib_cache.npz'
+CACHE_FILE = '/root/arcade/final_scripts/utils/calib_cache_cifar10.npz'
 REG_EPSILON = 1e-6
 # Hessian computation settings
 K = 128              # number of top eigenvalues to compute

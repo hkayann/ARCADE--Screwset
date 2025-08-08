@@ -36,7 +36,7 @@ torch.cuda.manual_seed_all(SEED)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-CACHE_FILE = '/root/arcade/final_scripts/utils/calib_cache.npz'
+CACHE_FILE = '/root/arcade/final_scripts/utils/calib_cache_cifar10.npz'
 K = 128
 MAXITER = 160
 z = 1e-4  # Smoothing constant for eff. dim. (set to weight decay)

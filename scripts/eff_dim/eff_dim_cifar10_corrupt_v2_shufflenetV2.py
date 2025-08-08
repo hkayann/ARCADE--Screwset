@@ -51,7 +51,7 @@ print(f"Using device: {device}")
 
 # --- Paths & Hyperparams ---
 CALIB_DIR         = '/root/arcade/data/cifar10_split/train'
-CACHE_FILE        = '/root/arcade/final_scripts/utils/calib_cache.npz'
+CACHE_FILE        = '/root/arcade/final_scripts/utils/calib_cache_cifar10.npz'
 MODEL_PATH        = '/root/arcade/final_scripts/final_models/shufflenet_models/shufflenet_v2_x1_0_cifar10_best.pth'
 OUTPUT_DIR        = '/root/arcade/final_scripts/final_results/shufflenetv2/hessian'
 CORRUPTIONS       = [
