@@ -133,3 +133,9 @@ ImageNet-A uses the *full* dataset (no subset available).
 ---
 ## IMPORTANT NOTE
 Many scripts in this repository use hardcoded file and directory paths for datasets, results, and models.  **Before running any script, you must replace these with the actual paths on your machine** to reproduce results.
+
+## Demo Video
+
+An anonymized demo video illustrating the ScrewSet experimental setup and evaluation pipeline is provided below.
+
+[Watch demo video](Arcade-DEMO_v4.mp4)
