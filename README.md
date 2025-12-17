@@ -136,6 +136,9 @@ Many scripts in this repository use hardcoded file and directory paths for datas
 
 ## Demo Video
 
-An anonymized demo video illustrating the ScrewSet experimental setup and evaluation pipeline is provided below.
+An anonymized demo video illustrating the ScrewSet experimental setup and evaluation pipeline.
 
-[Watch demo video](Arcade-DEMO_v4.mp4)
+<video controls width="720">
+  <source src="Arcade-DEMO_v4.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
